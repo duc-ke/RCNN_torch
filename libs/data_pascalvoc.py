@@ -13,7 +13,7 @@ suffix_jpeg = '.jpg'
 def get_voc2007(dir_path, is_return=False):
     """_summary_
     voc 2007 데이터셋을 다운받는다.
-    """    
+    """
     dataset = VOCDetection(dir_path, year='2007', image_set='trainval', download=True)
     
     if is_return:
