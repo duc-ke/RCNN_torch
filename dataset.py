@@ -6,6 +6,7 @@ from libs.data_pascalvoc import (
 )
 from libs.data_finetune import get_DNN_finetune_data
 from libs.data_classifier import get_classifier_data
+from libs.data_bbox_regression import get_regressor_data
 
 
 if __name__ == '__main__':
@@ -16,8 +17,8 @@ if __name__ == '__main__':
     car_val_path = 'data/VOCdevkit/VOC2007/ImageSets/Main/car_val.txt'
     
     finetune_root_dir = 'data/finetune_car/'
-    
     classifier_root_dir = 'data/classifier_car/'
+    regressor_root_dir = 'data/bbox_regression/'
     
     ## pascal voc 2007 원본 데이터셋 다운로드
     if not os.path.exists(dir_path):
@@ -40,6 +41,10 @@ if __name__ == '__main__':
         print('Classifier 학습 데이터셋 생성 완료.')
         
     ## bound box regressor 부분을 학습하기 위한 데이터셋 생성
+    if not os.path.exists(regressor_root_dir):
+        get_regressor_data(car_root_dir, finetune_root_dir, regressor_root_dir)
+        print('Bnd box regressor 학습 데이터셋 생성 완료.')
+    
     
     
     print('done')
