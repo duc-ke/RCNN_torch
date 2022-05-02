@@ -45,6 +45,4 @@ if __name__ == '__main__':
         get_regressor_data(car_root_dir, finetune_root_dir, regressor_root_dir)
         print('Bnd box regressor 학습 데이터셋 생성 완료.')
     
-    
-    
     print('done')
