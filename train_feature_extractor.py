@@ -1,12 +1,3 @@
-# -*- coding: utf-8 -*-
-
-"""
-@date: 2020/3/1 上午9:54
-@file: finetune.py
-@author: zj
-@description: 
-"""
-
 import os
 import copy
 import time
