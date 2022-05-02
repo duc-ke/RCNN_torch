@@ -26,12 +26,12 @@ def parse_annotation_jpeg(annotation_path, jpeg_path, gs):
     img = cv2.imread(jpeg_path)
 
     selectivesearch.config(gs, img, strategy='q')
-    # 计算候选建议
+    # 
     rects = selectivesearch.get_rects(gs)
-    # 获取标注边界框
+    # 
     bndboxs = parse_xml(annotation_path)
 
-    # 标注框大小
+    # 
     maximum_bndbox_size = 0
     for bndbox in bndboxs:
         xmin, ymin, xmax, ymax = bndbox
@@ -39,7 +39,7 @@ def parse_annotation_jpeg(annotation_path, jpeg_path, gs):
         if bndbox_size > maximum_bndbox_size:
             maximum_bndbox_size = bndbox_size
 
-    # 获取候选建议和标注边界框的IoU
+    # 
     iou_list = compute_ious(rects, bndboxs)
 
     positive_list = list()
@@ -81,7 +81,7 @@ def get_classifier_data(from_dir, to_dir):
         total_num_negative = 0
 
         samples = parse_car_csv(src_root_dir)
-        # 复制csv文件
+        # 
         src_csv_path = os.path.join(src_root_dir, 'car.csv')
         dst_csv_path = os.path.join(dst_root_dir, 'car.csv')
         shutil.copyfile(src_csv_path, dst_csv_path)
@@ -90,7 +90,7 @@ def get_classifier_data(from_dir, to_dir):
 
             src_annotation_path = os.path.join(src_annotation_dir, sample_name + '.xml')
             src_jpeg_path = os.path.join(src_jpeg_dir, sample_name + '.jpg')
-            # 获取正负样本
+            # 
             positive_list, negative_list = parse_annotation_jpeg(src_annotation_path, src_jpeg_path, gs)
             total_num_positive += len(positive_list)
             total_num_negative += len(negative_list)
@@ -98,9 +98,9 @@ def get_classifier_data(from_dir, to_dir):
             dst_annotation_positive_path = os.path.join(dst_annotation_dir, sample_name + '_1' + '.csv')
             dst_annotation_negative_path = os.path.join(dst_annotation_dir, sample_name + '_0' + '.csv')
             dst_jpeg_path = os.path.join(dst_jpeg_dir, sample_name + '.jpg')
-            # 保存图片
+            # 
             shutil.copyfile(src_jpeg_path, dst_jpeg_path)
-            # 保存正负样本标注
+            # 
             np.savetxt(dst_annotation_positive_path, np.array(positive_list), fmt='%d', delimiter=' ')
             np.savetxt(dst_annotation_negative_path, np.array(negative_list), fmt='%d', delimiter=' ')
 
