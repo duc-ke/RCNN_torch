@@ -5,6 +5,7 @@ import shutil
 import numpy as np
 import cv2
 import libs.selectivesearch_custom as selectivesearch
+
 from libs.util import check_dir
 from libs.util import parse_car_csv
 from libs.util import parse_xml
@@ -60,12 +61,12 @@ def parse_annotation_jpeg(annotation_path, jpeg_path, gs):
         iou_score = iou_list[i]
         """
         Feature extractor fine tuning을 위한 샘플링
-          - posivie sample : IoU 0.5 이상
-          - negative sample : IoU 0.5 미만 + G.T bbox 넓이의 1/5 이상일때
+          - posivie sample : IoU 0.5 이상인 s.s bbox
+          - negative sample : IoU 0.5 미만 + G.T bbox 넓이의 1/5 이상인 s.s bbox
         """
-        if iou_list[i] >= 0.5:
+        if iou_score >= 0.5:
             positive_list.append(rects[i])
-        if 0 < iou_list[i] < 0.5 and rect_size > maximum_bndbox_size / 5.0:
+        if 0 < iou_score < 0.5 and rect_size > maximum_bndbox_size / 5.0:
             negative_list.append(rects[i])
         else:
             pass
@@ -75,6 +76,10 @@ def parse_annotation_jpeg(annotation_path, jpeg_path, gs):
 
 
 def get_DNN_finetune_data(from_dir, to_dir):
+    """_summary_
+    [Feature Extractor(AlexNet) finetuning에 이용할 데이터셋을 만든다.]
+    기존 custom VOC폴더에서 postive, negative sample을 추출, 새로운 폴더에 옮긴다.
+    """
     car_root_dir = from_dir
     finetune_root_dir = to_dir
     
