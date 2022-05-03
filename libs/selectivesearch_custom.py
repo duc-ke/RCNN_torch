@@ -39,12 +39,14 @@ def get_rects(gs):
 
 if __name__ == '__main__':
     """
-    选择性搜索算法操作
+    openCV의 selective search 실행. bbox coordinates를 받는다.
+    [[xmin, ymin, xmax, ymax][]..] 로 구성.
     """
     gs = get_selective_search()
 
-    img = cv2.imread('./data/lena.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('../data/voc_car/train/JPEGImages/000012.jpg', cv2.IMREAD_COLOR)
     config(gs, img, strategy='q')
 
     rects = get_rects(gs)
-    print(rects)
+    print(rects.shape)  # (4647, 4) 4개의 coordinate, 4647 objs
+    print(rects)  # [[329  20 344  33] [185 268 459 333] ..
