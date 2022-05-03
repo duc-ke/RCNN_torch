@@ -5,6 +5,7 @@ import numpy as np
 import cv2
 import xmltodict
 from torchvision.datasets import VOCDetection
+
 from libs.util import check_dir
 # from util import check_dir   # __main__ 실행시 경로 수정
 
@@ -40,6 +41,7 @@ def parse_train_val(data_path):
 
 def sample_train_val(samples):
     """
+    쓰지않는 함수.
     """
     for name in ['train', 'val']:
         dataset = samples[name]
@@ -95,8 +97,6 @@ def get_custom_voc2007(voc_ori_dir, car_root_dir, car_train_path, car_val_path):
             voc_ori_dir
         )
         
-
-
 
 if __name__ == '__main__':
     car_train_path = '../data/VOCdevkit/VOC2007/ImageSets/Main/car_train.txt'
