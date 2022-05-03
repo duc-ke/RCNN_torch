@@ -48,22 +48,26 @@ def parse_xml(xml_path):
 
 def iou(pred_box, target_box):
     """
-
+    전형적인 IoU 계산 방법이지만,
+    target_box(GT)는 여러개(n, 4) 일수있으며 pred_box는 꼭 1개(4,) 여야만 함
     """
     if len(target_box.shape) == 1:
         target_box = target_box[np.newaxis, :]
+
 
     xA = np.maximum(pred_box[0], target_box[:, 0])
     yA = np.maximum(pred_box[1], target_box[:, 1])
     xB = np.minimum(pred_box[2], target_box[:, 2])
     yB = np.minimum(pred_box[3], target_box[:, 3])
-    # 计算交集面积
+    # print('targetbox[:,0]', target_box[:, 0])
+    # print('xA', xA)
+
     intersection = np.maximum(0.0, xB - xA) * np.maximum(0.0, yB - yA)
-    # 计算两个边界框面积
     boxAArea = (pred_box[2] - pred_box[0]) * (pred_box[3] - pred_box[1])
     boxBArea = (target_box[:, 2] - target_box[:, 0]) * (target_box[:, 3] - target_box[:, 1])
 
     scores = intersection / (boxAArea + boxBArea - intersection)
+    # print('scores!', scores)  # 보통 값 한개 ex) [109]지만, GT가 여러개(n개)일 경우 n개의 np.array를 갖는다.
     return scores
 
 
@@ -71,7 +75,9 @@ def compute_ious(rects, bndboxs):
     iou_list = list()
     for rect in rects:
         scores = iou(rect, bndboxs)
-        iou_list.append(max(scores))
+        
+        # xml안 bnd가 여러개여도 최대 IoU값만 구함. selective search 갯수만큼만 IoU 갯수 리스트로 반환
+        iou_list.append(max(scores))   
     return iou_list
 
 
