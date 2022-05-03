@@ -6,13 +6,14 @@ import cv2
 import xmltodict
 from torchvision.datasets import VOCDetection
 from libs.util import check_dir
+# from util import check_dir   # __main__ 실행시 경로 수정
 
 suffix_xml = '.xml'
 suffix_jpeg = '.jpg'
 
 def get_voc2007(dir_path, is_return=False):
     """_summary_
-    voc 2007 데이터셋을 다운받는다.
+    voc 2007 데이터셋을 torchvision으로부터 다운받는다.
     """
     dataset = VOCDetection(dir_path, year='2007', image_set='trainval', download=True)
     
@@ -21,6 +22,8 @@ def get_voc2007(dir_path, is_return=False):
 
 def parse_train_val(data_path):
     """
+    'data/VOCdevkit/VOC2007/ImageSets/Main/car_train.txt' 데이터셋에서
+    positive sample만 추려 아이디 저장
     """
     samples = []
 
@@ -28,7 +31,8 @@ def parse_train_val(data_path):
         lines = file.readlines()
         for line in lines:
             res = line.strip().split(' ')
-            if len(res) == 3 and int(res[2]) == 1:
+            # print(res)  # ['009949', '-1'] ['009959', '', '1']
+            if len(res) == 3 and int(res[2]) == 1:  # 1: positive sample(차 있음), -1: negative sample(차 없음)
                 samples.append(res[0])
 
     return np.array(samples)
@@ -54,6 +58,7 @@ def save_car(
     voc_ori_dir
     ):
     """
+    지정한 경로에 train, val 각각 annotation(xml)과 image(jpg) voc2007 원본으로 부터 복사.
     """
     
     voc_annotation_dir = os.path.join(voc_ori_dir, 'VOCdevkit/VOC2007/Annotations/')
@@ -93,3 +98,6 @@ def get_custom_voc2007(voc_ori_dir, car_root_dir, car_train_path, car_val_path):
 
 
 
+if __name__ == '__main__':
+    car_train_path = '../data/VOCdevkit/VOC2007/ImageSets/Main/car_train.txt'
+    parse_train_val(car_train_path)
