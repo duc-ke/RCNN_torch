@@ -15,6 +15,12 @@ from libs.util import check_dir
 
 
 def load_data(data_root_dir):
+    """_summary_
+    데이터 dir로부터 train, validation dataset_loader를 리턴.
+    - transform 적용(resize, flip, normalization)
+    selective search region을 positve, negative로 나눈뒤, 
+    128배치(양:음 = 32:96 갯수)단위로 데이터 준비 (negative 비율이 너무 많아서 강제 설정)
+    """
     # 이미지크기조정 + augmentation(flip) + normalization 
     transform = transforms.Compose([
         transforms.ToPILImage(),
@@ -34,8 +40,9 @@ def load_data(data_root_dir):
         # print(type(data_set[0][0]), type(data_set[0][1]), data_set[0][0].shape)  # <class 'torch.Tensor'> <class 'int'> torch.Size([3, 227, 227])
         
         # print(data_set.get_positive_num(), data_set.get_negative_num())  # 66165 454789
+        # 120배치 단위로 뽑아줄때 positive s.s region 32, negative s.s region 96개로 맞춰서 뽑도록 샘플러 설정
         data_sampler = CustomBatchSampler(data_set.get_positive_num(), data_set.get_negative_num(), 32, 96)
-        # print(len(data_sampler)) # 520832
+        # print(len(data_sampler)) # 520832 (num_iter * batch)
         
         # a = list(iter(data_sampler))[:128]
         # print(a)  # [387169, 278321, 19121, .. ], 128개 length
