@@ -18,7 +18,8 @@ def parse_car_csv(csv_dir):
 
 def parse_xml(xml_path):
     """
-
+    xml(GT)경로를 받아 bbox를 파싱
+    (xmin, ymin, xmax, ymax)를 np.array로 반환
     """
     # print(xml_path)
     with open(xml_path, 'rb') as f:

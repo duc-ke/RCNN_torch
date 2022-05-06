@@ -79,6 +79,7 @@ def get_DNN_finetune_data(from_dir, to_dir):
     """_summary_
     [Feature Extractor(AlexNet) finetuning에 이용할 데이터셋을 만든다.]
     기존 custom VOC폴더에서 postive, negative sample을 추출, 새로운 폴더에 옮긴다.
+    참고) finetune, classifier는 분류문제 이므로 G.T(bbox)가 필요없다. positive, negative bbox인지만 알면됨.
     """
     car_root_dir = from_dir
     finetune_root_dir = to_dir

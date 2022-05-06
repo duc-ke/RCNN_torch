@@ -79,6 +79,9 @@ def save_car(
     np.savetxt(csv_path, np.array(car_samples), fmt='%s')
 
 def get_custom_voc2007(voc_ori_dir, car_root_dir, car_train_path, car_val_path):
+    """_summary_
+    제공된 train_path, val_path에서 positive sample(img)만 추려 새로운 dir로 이동
+    """
     samples = {'train': parse_train_val(car_train_path), 'val': parse_train_val(car_val_path)}
     print(samples)
     
