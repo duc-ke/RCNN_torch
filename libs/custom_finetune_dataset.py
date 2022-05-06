@@ -1,12 +1,3 @@
-# -*- coding: utf-8 -*-
-
-"""
-@date: 2020/3/3 下午7:06
-@file: custom_finetune_dataset.py
-@author: zj
-@description: 自定义微调数据类
-"""
-
 import numpy  as np
 import os
 import cv2
@@ -15,7 +6,7 @@ from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 
-from utils.util import parse_car_csv
+from libs.util import parse_car_csv
 
 
 class CustomFinetuneDataset(Dataset):

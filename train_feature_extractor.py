@@ -14,6 +14,7 @@ from libs.util import check_dir
 
 
 def load_data(data_root_dir):
+    # 이미지크기조정 + augmentation(flip) + normalization 
     transform = transforms.Compose([
         transforms.ToPILImage(),
         transforms.Resize((227, 227)),
@@ -108,7 +109,7 @@ def train_model(data_loaders, model, criterion, optimizer, lr_scheduler, num_epo
 if __name__ == '__main__':
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    data_loaders, data_sizes = load_data('./data/finetune_car')
+    data_loaders, data_sizes = load_data('./data/finetune_car') 
 
     model = models.alexnet(pretrained=True)
     # print(model)

@@ -12,7 +12,8 @@ import random
 from torch.utils.data import Sampler
 from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
-from utils.data.custom_finetune_dataset import CustomFinetuneDataset
+# from utils.data.custom_finetune_dataset import CustomFinetuneDataset
+from libs.custom_finetune_dataset import CustomFinetuneDataset
 
 
 class CustomBatchSampler(Sampler):
