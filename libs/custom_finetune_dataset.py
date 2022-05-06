@@ -8,11 +8,14 @@ import torchvision.transforms as transforms
 
 from libs.util import parse_car_csv
 
+# ## __main__ 실행시, 경로 수정한 라이브러리 활성화 필요.
+# from util import parse_car_csv
+
 
 class CustomFinetuneDataset(Dataset):
 
     def __init__(self, root_dir, transform=None):
-        samples = parse_car_csv(root_dir)
+        samples = parse_car_csv(root_dir)  # data/finetune_car/train/car.csv
 
         jpeg_images = [cv2.imread(os.path.join(root_dir, 'JPEGImages', sample_name + ".jpg"))
                        for sample_name in samples]
@@ -22,18 +25,17 @@ class CustomFinetuneDataset(Dataset):
         negative_annotations = [os.path.join(root_dir, 'Annotations', sample_name + '_0.csv')
                                 for sample_name in samples]
 
-        # 边界框大小
+        # 각 이미지마다의 selective search region 갯수를 저장할 리스트
         positive_sizes = list()
         negative_sizes = list()
-        # 边界框坐标
+        # 전체 이미지들의 bbox coordinates를 저장할 list (xmin, ymin, xmax, ymax)
         positive_rects = list()
         negative_rects = list()
 
-        for annotation_path in positive_annotations:
-            rects = np.loadtxt(annotation_path, dtype=np.int, delimiter=' ')
-            # 存在文件为空或者文件中仅有单行数据
+        for annotation_path in positive_annotations:  # positive bboxes : data/finetune_car/train/Annotations/*_1.csv
+            rects = np.loadtxt(annotation_path, dtype=np.int, delimiter=' ')  # 2차원 np.array (339, 4)
+
             if len(rects.shape) == 1:
-                # 是否为单行
                 if rects.shape[0] == 4:
                     positive_rects.append(rects)
                     positive_sizes.append(1)
@@ -42,9 +44,9 @@ class CustomFinetuneDataset(Dataset):
             else:
                 positive_rects.extend(rects)
                 positive_sizes.append(len(rects))
-        for annotation_path in negative_annotations:
+        for annotation_path in negative_annotations:  # negative bboxes : data/finetune_car/train/Annotations/*_0.csv
             rects = np.loadtxt(annotation_path, dtype=np.int, delimiter=' ')
-            # 和正样本规则一样
+
             if len(rects.shape) == 1:
                 if rects.shape[0] == 4:
                     negative_rects.append(rects)
@@ -61,28 +63,31 @@ class CustomFinetuneDataset(Dataset):
         self.negative_sizes = negative_sizes
         self.positive_rects = positive_rects
         self.negative_rects = negative_rects
-        self.total_positive_num = int(np.sum(positive_sizes))
-        self.total_negative_num = int(np.sum(negative_sizes))
+        self.total_positive_num = int(np.sum(positive_sizes))  # 전체 이미지의 positive selective search region갯수
+        self.total_negative_num = int(np.sum(negative_sizes))  # 전체 이미지의 negative selective search region갯수
+        
+        # print(len(positive_sizes), len(negative_sizes))  # 이미지 갯수 376 376
+        # print(len(positive_rects), len(negative_rects))  # bbox(region) 갯수 66,165 454,789
+        # print(self.total_positive_num, self.total_negative_num) # bbox(region) 갯수 66,165 454,789
 
     def __getitem__(self, index: int):
-        # 定位下标所属图像
         image_id = len(self.jpeg_images) - 1
-        if index < self.total_positive_num:
-            # 正样本
+        if index < self.total_positive_num:  # positive region 보다 작다면
+            # class(1:양성 샘플)와 coordinates를 확인
             target = 1
             xmin, ymin, xmax, ymax = self.positive_rects[index]
-            # 寻找所属图像
-            for i in range(len(self.positive_sizes) - 1):
+            # 이미지id (idx)를 확인, coordinates에 맞는 영역만 crop
+            for i in range(len(self.positive_sizes) - 1):  # positive 이미지 갯수 -1
                 if np.sum(self.positive_sizes[:i]) <= index < np.sum(self.positive_sizes[:(i + 1)]):
                     image_id = i
                     break
             image = self.jpeg_images[image_id][ymin:ymax, xmin:xmax]
         else:
-            # 负样本
+            # class(0:음성 샘플)와 coordinates를 확인
             target = 0
             idx = index - self.total_positive_num
             xmin, ymin, xmax, ymax = self.negative_rects[idx]
-            # 寻找所属图像
+            # 이미지id (idx)를 확인, coordinates에 맞는 영역만 crop
             for i in range(len(self.negative_sizes) - 1):
                 if np.sum(self.negative_sizes[:i]) <= idx < np.sum(self.negative_sizes[:(i + 1)]):
                     image_id = i

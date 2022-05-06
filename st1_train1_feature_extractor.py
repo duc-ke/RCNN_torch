@@ -1,4 +1,5 @@
 import os
+import numpy as np
 import copy
 import time
 import torch
@@ -26,11 +27,24 @@ def load_data(data_root_dir):
     data_loaders = {}
     data_sizes = {}
     for name in ['train', 'val']:
-        data_dir = os.path.join(data_root_dir, name)
+        data_dir = os.path.join(data_root_dir, name)  # data/finetune_car/train
         data_set = CustomFinetuneDataset(data_dir, transform=transform)
+        # print(len(data_set))  # 520,954개의 selective search regions
+        # print(data_set[0])  # 튜플로 묶여있음 : (tensor(3, 227, 227), int(0또는 1))
+        # print(type(data_set[0][0]), type(data_set[0][1]), data_set[0][0].shape)  # <class 'torch.Tensor'> <class 'int'> torch.Size([3, 227, 227])
+        
+        # print(data_set.get_positive_num(), data_set.get_negative_num())  # 66165 454789
         data_sampler = CustomBatchSampler(data_set.get_positive_num(), data_set.get_negative_num(), 32, 96)
+        # print(len(data_sampler)) # 520832
+        
+        # a = list(iter(data_sampler))[:128]
+        # print(a)  # [387169, 278321, 19121, .. ], 128개 length
+        
         data_loader = DataLoader(data_set, batch_size=128, sampler=data_sampler, num_workers=8, drop_last=True)
-
+        # print(len(data_loader))    # 4069
+        # b = next(iter(data_loader))  # 튜플로 묶여있음 : (tensor(B, 3, 227, 227), tensor(0또는 1))
+        # print(b[0].shape, b[1].shape) # torch.Size([128, 3, 227, 227]) torch.Size([128])
+        
         data_loaders[name] = data_loader
         data_sizes[name] = data_sampler.__len__()
 
@@ -112,10 +126,18 @@ if __name__ == '__main__':
     data_loaders, data_sizes = load_data('./data/finetune_car') 
 
     model = models.alexnet(pretrained=True)
-    # print(model)
+    print(model)
+    # print(list(model.features.children()))
+    # test_model = nn.Sequential(*list(model.features.children()))
+    # print(test_model)
+    # a = torch.ones(100, 3, 224, 224)
+    # out_a = test_model(a)  # torch.Size([100, 256, 6, 6])
+    # print(out_a.shape)
+    
+    
     num_features = model.classifier[6].in_features
+    # print(num_features)  # 4096
     model.classifier[6] = nn.Linear(num_features, 2)
-    # print(model)
     model = model.to(device)
 
     criterion = nn.CrossEntropyLoss()
@@ -123,6 +145,6 @@ if __name__ == '__main__':
     lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
 
     best_model = train_model(data_loaders, model, criterion, optimizer, lr_scheduler, device=device, num_epochs=25)
-    # 保存最好的模型参数
+    # best 모델 저장
     check_dir('./models')
     torch.save(best_model.state_dict(), 'models/alexnet_car.pth')
