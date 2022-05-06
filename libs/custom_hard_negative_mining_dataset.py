@@ -1,12 +1,3 @@
-# -*- coding: utf-8 -*-
-
-"""
-@date: 2020/3/18 下午3:37
-@file: custom_hard_negative_mining_dataset.py
-@author: zj
-@description: 
-"""
-
 import torch.nn as nn
 from torch.utils.data import Dataset
 from libs.custom_classifier_dataset import CustomClassifierDataset

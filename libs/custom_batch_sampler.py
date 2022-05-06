@@ -3,6 +3,7 @@ import random
 from torch.utils.data import Sampler
 from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
+
 from libs.custom_finetune_dataset import CustomFinetuneDataset
 
 # ## __main__ 실행시, 경로 수정한 라이브러리 활성화 필요.
@@ -29,6 +30,7 @@ class CustomBatchSampler(Sampler):
 
         self.batch = batch_negative + batch_positive  # 128 (배치단위: 양성배치 + 음성배치)
         self.num_iter = length // self.batch # 전체 iter수 (전체 bbox region / 배치단위)
+        print(f'num iter {self.num_iter}')  # 4069
 
     def __iter__(self):
         """_summary_

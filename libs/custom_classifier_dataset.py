@@ -1,12 +1,3 @@
-# -*- coding: utf-8 -*-
-
-"""
-@date: 2020/3/4 下午4:00
-@file: custom_classifier_dataset.py
-@author: zj
-@description: 分类器数据集类，可进行正负样本集替换，适用于hard negative mining操作
-"""
-
 import numpy  as np
 import os
 import cv2
@@ -17,11 +8,16 @@ import torchvision.transforms as transforms
 
 from libs.util import parse_car_csv
 
+# ## __main__ 실행시, 경로 수정한 라이브러리 활성화 필요.
+# from util import parse_car_csv
 
 class CustomClassifierDataset(Dataset):
+    """_summary_
+    CustomFinetuneDataset과 비슷한 구조지만 훨씬 보기 편하게 만든 클래스임.
+    """
 
     def __init__(self, root_dir, transform=None):
-        samples = parse_car_csv(root_dir)
+        samples = parse_car_csv(root_dir)  # data/classifier_car/train/car.csv 
 
         jpeg_images = list()
         positive_list = list()
@@ -32,9 +28,9 @@ class CustomClassifierDataset(Dataset):
 
             positive_annotation_path = os.path.join(root_dir, 'Annotations', sample_name + '_1.csv')
             positive_annotations = np.loadtxt(positive_annotation_path, dtype=np.int, delimiter=' ')
-            # 考虑csv文件为空或者仅包含单个标注框
+            
+            # positive selective search region의 정보를 리스트에 dictionary요소로 저장
             if len(positive_annotations.shape) == 1:
-                # 单个标注框坐标
                 if positive_annotations.shape[0] == 4:
                     positive_dict = dict()
 
@@ -55,9 +51,8 @@ class CustomClassifierDataset(Dataset):
 
             negative_annotation_path = os.path.join(root_dir, 'Annotations', sample_name + '_0.csv')
             negative_annotations = np.loadtxt(negative_annotation_path, dtype=np.int, delimiter=' ')
-            # 考虑csv文件为空或者仅包含单个标注框
+            # negative selective search region의 정보를 리스트에 dictionary요소로 저장
             if len(negative_annotations.shape) == 1:
-                # 单个标注框坐标
                 if negative_annotations.shape[0] == 4:
                     negative_dict = dict()
 
@@ -77,14 +72,18 @@ class CustomClassifierDataset(Dataset):
                     negative_list.append(negative_dict)
 
         self.transform = transform
-        self.jpeg_images = jpeg_images
+        self.jpeg_images = jpeg_images  # 전체 이미지들이 리스트로 저장되어있음
         self.positive_list = positive_list
         self.negative_list = negative_list
+        # print(len(positive_list))   # 625
+        # print(positive_list) [{'rect':np.arr(1,2,3,4), 'image_id':1}, {...}]
 
     def __getitem__(self, index: int):
-        # 定位下标所属图像
+        """_summary_
+        앞쪽 index는 positive s.s region, 뒷쪽 index는 negative s.s region로 반환
+        """
         if index < len(self.positive_list):
-            # 正样本
+            # class(1:양성 샘플)와 coordinates에 맞는 img crop
             target = 1
             positive_dict = self.positive_list[index]
 
@@ -92,9 +91,9 @@ class CustomClassifierDataset(Dataset):
             image_id = positive_dict['image_id']
 
             image = self.jpeg_images[image_id][ymin:ymax, xmin:xmax]
-            cache_dict = positive_dict
+            cache_dict = positive_dict  # {'rect':np.arr(1,2,3,4), 'image_id':1}
         else:
-            # 负样本
+            # class(0:음성 샘플)와 coordinates에 맞는 img crop
             target = 0
             idx = index - len(self.positive_list)
             negative_dict = self.negative_list[idx]
@@ -133,14 +132,13 @@ class CustomClassifierDataset(Dataset):
     def get_negatives(self) -> list:
         return self.negative_list
 
-    # 用于hard negative mining
-    # 替换负样本
+    # negative_list를( [{'rect':np.arr(1,2,3,4), 'image_id':1},{...}] ) 새로 입력받으면 업데이트 하도록 메서드 제작.
     def set_negative_list(self, negative_list):
         self.negative_list = negative_list
 
 
 def test(idx):
-    root_dir = '../../data/classifier_car/val'
+    root_dir = '../data/classifier_car/val'
     train_data_set = CustomClassifierDataset(root_dir)
 
     print('positive num: %d' % train_data_set.get_positive_num())
@@ -161,7 +159,7 @@ def test(idx):
 
 
 def test2():
-    root_dir = '../../data/classifier_car/train'
+    root_dir = '../data/classifier_car/train'
     transform = transforms.Compose([
         transforms.ToPILImage(),
         transforms.Resize((227, 227)),
@@ -177,7 +175,7 @@ def test2():
 
 
 def test3():
-    root_dir = '../../data/classifier_car/train'
+    root_dir = '../data/classifier_car/train'
     transform = transforms.Compose([
         transforms.ToPILImage(),
         transforms.Resize((227, 227)),
