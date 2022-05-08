@@ -30,7 +30,7 @@ cd RCNN_torch
 pip install -r requirements.txt
 ```
 
-### 2. 데이터셋 준비
+### 2. 데이터셋 준비 (다운로드 링크에서 데이터셋을 다운받으면 생략 가능)
 `data/` 디렉토리가 자동생성되며 그 하위에 아래와 같이 4가지 데이터셋 디렉토리가 생성(약 1.2Gb의 공간 필요)
   * `VOCdevkit/`
   * `voc_car/`
@@ -42,7 +42,8 @@ pip install -r requirements.txt
 python load_dataset.py
 ```
 
-### 3. 모델 학습 및 생성
+
+### 3. 모델 학습 및 생성 (다운로드 링크에서 모델을 다운받으면 생략 가능)
 * Feature extractor, Classifier(SVM), Bounding box regressor 3가지 모델을 생성해야 함.
 * 전체 모델 학습을 위해 약 2.7Gb의 여유 공간 필요
 ```bash
@@ -55,6 +56,7 @@ python train_st2_classifer_svm.py
 # 3. Bbox regressor model 학습
 python train_st3_bbox_regression.py
 ```
+
 
 ### 4. inference 테스트
 3가지 모델이 준비가 되어있어야만 inference가 가능. 현재 inference에는 bbox regressor model이 쓰이질 않고 있는데 이를 업데이트할 예정임.
