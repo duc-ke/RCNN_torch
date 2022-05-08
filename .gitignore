@@ -3,6 +3,7 @@ data/
 *.tar
 models/
 loss.png
+*.jpg
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
