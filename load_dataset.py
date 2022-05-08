@@ -40,7 +40,7 @@ if __name__ == '__main__':
         get_classifier_data(car_root_dir, classifier_root_dir)
         print('Classifier 학습 데이터셋 생성 완료.')
         
-    ## bound box regressor 부분을 학습하기 위한 데이터셋 생성(약 4.4Gb)
+    ## bound box regressor 부분을 학습하기 위한 데이터셋 생성(약 36Mb)
     if not os.path.exists(regressor_root_dir):
         get_regressor_data(car_root_dir, finetune_root_dir, regressor_root_dir)
         print('Bnd box regressor 학습 데이터셋 생성 완료.')
