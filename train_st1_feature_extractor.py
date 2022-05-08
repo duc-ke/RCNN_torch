@@ -40,7 +40,7 @@ def load_data(data_root_dir):
         # print(type(data_set[0][0]), type(data_set[0][1]), data_set[0][0].shape)  # <class 'torch.Tensor'> <class 'int'> torch.Size([3, 227, 227])
         
         # print(data_set.get_positive_num(), data_set.get_negative_num())  # 66165 454789
-        # 120배치 단위로 뽑아줄때 positive s.s region 32, negative s.s region 96개로 맞춰서 뽑도록 샘플러 설정
+        # 128배치 단위로 뽑아줄때 positive s.s region 32, negative s.s region 96개로 맞춰서 뽑도록 샘플러 설정
         data_sampler = CustomBatchSampler(data_set.get_positive_num(), data_set.get_negative_num(), 32, 96)
         # print(len(data_sampler)) # 520832 (num_iter * batch)
         
@@ -141,14 +141,15 @@ if __name__ == '__main__':
     # out_a = test_model(a)  # torch.Size([100, 256, 6, 6])
     # print(out_a.shape)
     
-    
     num_features = model.classifier[6].in_features
     # print(num_features)  # 4096
     model.classifier[6] = nn.Linear(num_features, 2)
     model = model.to(device)
 
     criterion = nn.CrossEntropyLoss()
+    # Momentum opt + scheduler
     optimizer = optim.SGD(model.parameters(), lr=1e-3, momentum=0.9)
+    # scheduler epoch 4마다 lr를 줄여줌 (pre lr * gamma)
     lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
 
     best_model = train_model(data_loaders, model, criterion, optimizer, lr_scheduler, device=device, num_epochs=25)
