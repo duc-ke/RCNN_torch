@@ -10,7 +10,7 @@ RCNN 논문 'Rich feature hierarchies for accurate object detection and semantic
 
 ## 데이터셋 및 모델 다운로드
 아래 실행 파트의 순서를 진행하면 데이터셋과 모델을 생성할 수 있으나 실행시간 및 환경의 제약으로 `데이터셋 준비` 및 `모델 학습 및 생성`을 생략해야 한다면 아래 링크에서 파일을 다운받을 수 있음.
-* RCNN_torch dataset & models : [download link](https://www.dropbox.com/s/1nw2b7r2i1dyz2w/RCNN_dataset_n_models.zip?dl=0)
+* RCNN_torch dataset & models (1.2Gb) : [download link](https://www.dropbox.com/s/1nw2b7r2i1dyz2w/RCNN_dataset_n_models.zip?dl=0)
 * 압축을 풀고 RCNN_torch에 다음과 같이 위치시킨다.
   * `RCNN_torch/data/`
   * `RCNN_torch/models/`
