@@ -16,11 +16,11 @@ def get_device():
 
 
 def get_transform():
-    # 数据转换
+    # inference 할 img 전처리(augmentation은 제거해야 할듯함.)
     transform = transforms.Compose([
         transforms.ToPILImage(),
         transforms.Resize((227, 227)),
-        transforms.RandomHorizontalFlip(),
+        # transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
@@ -28,7 +28,7 @@ def get_transform():
 
 
 def get_model(device=None):
-    # 加载CNN模型
+    # classifer model load
     model = alexnet()
     num_classes = 2
     num_features = model.classifier[6].in_features
@@ -36,7 +36,7 @@ def get_model(device=None):
     model.load_state_dict(torch.load('./models/best_linear_svm_alexnet_car.pth'))
     model.eval()
 
-    # 取消梯度追踪
+    # weight 고정 및 device setting
     for param in model.parameters():
         param.requires_grad = False
     if device:
@@ -57,7 +57,7 @@ def get_model(device=None):
 
 def draw_box_with_text(img, rect_list, score_list):
     """
-    绘制边框及其分类概率
+    openCV로 이미지에 bbox와 confidence score(from SVM) 쓰기
     :param img:
     :param rect_list:
     :param score_list:
@@ -73,9 +73,9 @@ def draw_box_with_text(img, rect_list, score_list):
 
 def nms(rect_list, score_list):
     """
-    非最大抑制
-    :param rect_list: list，大小为[N, 4]
-    :param score_list： list，大小为[N]
+    Non-Max Suppression 구현(confidence score < 0.6, IoU > 0.3 제거대상)
+    :param rect_list: list，shape:[N, 4]
+    :param score_list： list，shape[N]
     """
     nms_rects = list()
     nms_scores = list()
@@ -83,15 +83,13 @@ def nms(rect_list, score_list):
     rect_array = np.array(rect_list)
     score_array = np.array(score_list)
 
-    # 一次排序后即可
-    # 按分类概率从大到小排序
+    # confidence score 기준 내림차순 정렬
     idxs = np.argsort(score_array)[::-1]
     rect_array = rect_array[idxs]
     score_array = score_array[idxs]
 
     thresh = 0.3
     while len(score_array) > 0:
-        # 添加分类概率最大的边界框
         nms_rects.append(rect_array[0])
         nms_scores.append(score_array[0])
         rect_array = rect_array[1:]
@@ -101,10 +99,10 @@ def nms(rect_list, score_list):
         if length <= 0:
             break
 
-        # 计算IoU
+        # IoU
         iou_scores = util.iou(np.array(nms_rects[len(nms_rects) - 1]), rect_array)
         # print(iou_scores)
-        # 去除重叠率大于等于thresh的边界框
+        # 0.3이상인 selective search bbox들은 제거
         idxs = np.where(iou_scores < thresh)[0]
         rect_array = rect_array[idxs]
         score_array = score_array[idxs]
@@ -117,7 +115,7 @@ if __name__ == '__main__':
     transform = get_transform()
     model, model_linear = get_model(device=device)
 
-    # 创建selectivesearch对象
+    # selectivesearch
     gs = selectivesearch.get_selective_search()
 
     # test_img_path = '../imgs/000007.jpg'
@@ -133,16 +131,14 @@ if __name__ == '__main__':
         xmin, ymin, xmax, ymax = bndbox
         cv2.rectangle(dst, (xmin, ymin), (xmax, ymax), color=(0, 255, 0), thickness=1)
 
-    # 候选区域建议
     selectivesearch.config(gs, img, strategy='f')
     rects = selectivesearch.get_rects(gs)
-    print('候选区域建议数目： %d' % len(rects))
+    print('selective search bbox 갯수 %d' % len(rects))
 
     # softmax = torch.softmax()
 
     svm_thresh = 0.60
 
-    # 保存正样本边界框以及
     score_list = list()
     positive_list = list()
 
@@ -154,11 +150,14 @@ if __name__ == '__main__':
         rect_img = img[ymin:ymax, xmin:xmax]
 
         rect_transform = transform(rect_img).to(device)
+        
+        # SVM classifer inference
         output = model(rect_transform.unsqueeze(0))[0]
 
         if torch.argmax(output).item() == 1:
             """
-            预测为汽车
+            s.s bnd중 positive 예측(car) bbox들에 대하여, 0.6 confidence score만 남김
+            추가로 bbox coordinate 보정값 구하기를 구현중(아직 불완전)
             """
             probs = torch.softmax(output, dim=0).cpu().numpy()
 
@@ -176,6 +175,7 @@ if __name__ == '__main__':
                 features = torch.flatten(features, 1)
                 print(features.shape)  # [1, 9216]
                 
+                # Bbox regressor inference (구현중)
                 pred_bbox = model_linear(features)[0].cpu()
                 # print(pred_bbox.shape, pred_bbox)
                 dp_x, dp_y, dp_w, dp_h = pred_bbox
