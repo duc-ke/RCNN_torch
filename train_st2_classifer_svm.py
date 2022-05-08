@@ -66,7 +66,7 @@ def load_data(data_root_dir):
             negative_list = data_set.get_negatives()
             # print(len(positive_list), len(negative_list))  # selective search region (625, 358294) 
 
-            ## positive s.s region 갯수만큼 negative s.s region 뽑아줌
+            ## positive s.s region 갯수만큼 negative s.s region 뽑아줌 1:1 비율
             init_negative_idxs = random.sample(range(len(negative_list)), len(positive_list))
             # 선별한 negative s.s region 정보
             init_negative_list = [negative_list[idx] for idx in range(len(negative_list)) if idx in init_negative_idxs]
