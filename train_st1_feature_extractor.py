@@ -111,6 +111,7 @@ def train_model(data_loaders, model, criterion, optimizer, lr_scheduler, num_epo
                 phase, epoch_loss, epoch_acc))
 
             # deep copy the model
+            # 모델 저장 규칙 : best validation accuracy 
             if phase == 'val' and epoch_acc > best_acc:
                 best_acc = epoch_acc
                 best_model_weights = copy.deepcopy(model.state_dict())
@@ -128,17 +129,25 @@ def train_model(data_loaders, model, criterion, optimizer, lr_scheduler, num_epo
 
 
 if __name__ == '__main__':
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:6" if torch.cuda.is_available() else "cpu")
 
     data_loaders, data_sizes = load_data('./data/finetune_car') 
 
     model = models.alexnet(pretrained=True)
     print(model)
+    
+    ## [ features layer을 통과한 F.M 출력 ]
     # print(list(model.features.children()))
     # test_model = nn.Sequential(*list(model.features.children()))
     # print(test_model)
     # a = torch.ones(100, 3, 224, 224)
     # out_a = test_model(a)  # torch.Size([100, 256, 6, 6])
+    # print(out_a.shape)
+    
+    ## [ features layer을 통과한 F.M 출력 - 간단버전 ]
+    # test_model2 = model.features
+    # a = torch.ones(100, 3, 224, 224)
+    # out_a = test_model2(a) 
     # print(out_a.shape)
     
     num_features = model.classifier[6].in_features
@@ -150,6 +159,7 @@ if __name__ == '__main__':
     # Momentum opt + scheduler
     optimizer = optim.SGD(model.parameters(), lr=1e-3, momentum=0.9)
     # scheduler epoch 4마다 lr를 줄여줌 (pre lr * gamma)
+    # step_size=7 : 7 epochs 마다 lr 변화
     lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
 
     best_model = train_model(data_loaders, model, criterion, optimizer, lr_scheduler, device=device, num_epochs=25)
