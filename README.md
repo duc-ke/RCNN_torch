@@ -12,7 +12,10 @@ RCNN 논문 'Rich feature hierarchies for accurate object detection and semantic
 
 본 RCNN_torch는 Pascal voc dataset(2007)에서 자동차 이미지만을 학습시키기 때문에 binary class object detection으로 구현되어 있음
 
-
+## Document
+'모두의 연구소'에서 objecti detection을 스터디하면서 RCNN_torch repository를 제작함. 발표를 위한 설명용도 notion에 설명 페이지를 정리하고 있음.
+ * [RCNN_torch Doc notion link](https://kmembers.notion.site/RCNN_torch-017c20ade8d6416d8388e2016f5f2f4f)
+ 
 ## 데이터셋 및 모델 다운로드
 아래 실행 파트의 순서를 진행하면 데이터셋과 모델을 생성할 수 있으나 실행시간 및 환경의 제약으로 `데이터셋 준비` 및 `모델 학습 및 생성`을 생략해야 한다면 아래 링크에서 파일을 다운받을 수 있음.
 * RCNN_torch dataset & models (1.2Gb) : [download link](https://www.dropbox.com/s/1nw2b7r2i1dyz2w/RCNN_dataset_n_models.zip?dl=0)
