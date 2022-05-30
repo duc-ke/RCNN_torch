@@ -82,12 +82,12 @@ def train_model(data_loader, feature_model, model, criterion, optimizer, lr_sche
 
 
 def get_model(device=None):
-    # 加载CNN模型
+    # classifier 모델 불러오기
     model = AlexNet(num_classes=2)
     model.load_state_dict(torch.load('./models/best_linear_svm_alexnet_car.pth'))
     model.eval()
 
-    # 取消梯度追踪
+    # 가중치 업데이트 안되게 막기
     for param in model.parameters():
         param.requires_grad = False
     if device:
@@ -113,7 +113,7 @@ if __name__ == '__main__':
     exit()
     """
     
-    # AlexNet의 마지막 풀링레이버의 shape
+    # AlexNet의 마지막 풀링레이어의 shape
     in_features = 256 * 6 * 6
     out_features = 4 # 예측하고픈 bbox coordinates
     model = nn.Linear(in_features, out_features)
